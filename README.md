@@ -12,12 +12,14 @@ It is intended to grow into a library that provides everything you need to work 
   - [x] `FCtrl`
   - [x] `FHDR`
   - [x] `MACPayload` for data messages
-  - [ ] `MACPayload` for join messages
+  - [ ] `MACPayload` for join request messages
+  - [ ] `MACPayload` for join accept messages
   - [x] `MHDR`
   - [x] `PHYPayload` (needs testing)
 - [ ] Crypto
   - [x] Calculating `MIC` (needs testing)
   - [x] Crypto for `FRMPayload` (needs testing)
+  - [ ] Crypto for join accept messages
 - [ ] Convenience Functions
 
 **For the future:**
