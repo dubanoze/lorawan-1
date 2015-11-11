@@ -45,7 +45,7 @@ import (
 
 ## Docs
 
-> TODO
+[![GoDoc](https://godoc.org/github.com/htdvisser/lorawan?status.svg)](https://godoc.org/github.com/htdvisser/lorawan)
 
 ## License
 
