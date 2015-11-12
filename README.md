@@ -49,6 +49,11 @@ import (
 
 [![GoDoc](https://godoc.org/github.com/htdvisser/lorawan?status.svg)](https://godoc.org/github.com/htdvisser/lorawan)
 
+## Links
+
+- [The LoRaWAN™ network protocol (LoRa® Alliance)](http://www.lora-alliance.org/)
+- [The Things Network](http://thethingsnetwork.org/)
+
 ## License
 
 MIT licensed, see LICENSE file.
