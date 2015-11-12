@@ -6,6 +6,8 @@ It is intended to grow into a library that provides everything you need to work 
 
 ## Status
 
+[![Build Status](https://travis-ci.org/htdvisser/lorawan.svg)](https://travis-ci.org/htdvisser/lorawan)
+
 **Work in Progress:**
 
 - [ ] Encoders + Decoders
