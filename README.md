@@ -15,10 +15,10 @@ It is intended to grow into a library that provides everything you need to work 
   - [ ] `MACPayload` for join request messages
   - [ ] `MACPayload` for join accept messages
   - [x] `MHDR`
-  - [x] `PHYPayload` (needs testing)
+  - [x] `PHYPayload` (works, but needs testing)
 - [ ] Crypto
-  - [x] Calculating `MIC` (needs testing)
-  - [x] Crypto for `FRMPayload` (needs testing)
+  - [x] Calculating `MIC` (works, but needs testing)
+  - [x] Crypto for `FRMPayload` (works, but needs testing)
   - [ ] Crypto for join accept messages
 - [ ] Convenience Functions
 
