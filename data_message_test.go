@@ -33,12 +33,9 @@ func TestDataPayloadBytes(t *testing.T) {
 			t.Errorf("%#v.Bytes()\n   got: %#v\n  want: %#v", c.structure, got, c.binary)
 		}
 	}
-
 }
 
 func TestParseDataPayload(t *testing.T) {
-	// TODO: Test for invalid inputs
-
 	for _, c := range dataPayloads {
 		got, _ := ParseDataPayload(c.binary)
 
@@ -48,6 +45,16 @@ func TestParseDataPayload(t *testing.T) {
 		if !bytes.Equal(got.RawFRMPayload, c.structure.RawFRMPayload) {
 			t.Errorf("ParseDataPayload(%#v).RawFRMPayload\n   got: %#v\n  want: %#v", c.binary, got.RawFRMPayload, c.structure.RawFRMPayload)
 		}
+	}
+
+	_, err1 := ParseDataPayload([]byte{0x00, 0x00})
+	if err1 == nil {
+		t.Errorf("ParseDataPayload should error on invalid data")
+	}
+
+	_, err2 := ParseDataPayload([]byte{0xEF, 0xCD, 0x65, 0x87, fCtrls[1].binary, 0x35, 0x40})
+	if err2 == nil {
+		t.Errorf("ParseDataPayload should error on invalid data")
 	}
 }
 
@@ -79,8 +86,6 @@ func TestFHDRBytes(t *testing.T) {
 }
 
 func TestParseFHDR(t *testing.T) {
-	// TODO: Test for invalid inputs
-
 	for _, c := range append(fHdrs, parseOnlyFHdrs...) {
 		got, _ := ParseFHDR(c.binary)
 		if got.DevAddr != c.structure.DevAddr {
@@ -95,6 +100,11 @@ func TestParseFHDR(t *testing.T) {
 		if !bytes.Equal(got.FOpts, c.structure.FOpts) {
 			t.Errorf("ParseFHDR(%#v).FOpts\n   got: %#v\n  want: %#v", c.binary, got.FOpts, c.structure.FOpts)
 		}
+	}
+
+	_, err := ParseFHDR([]byte{0xEF, 0xCD, 0x65, 0x87, fCtrls[1].binary, 0x35, 0x40})
+	if err == nil {
+		t.Errorf("ParseFHDR should error on invalid data")
 	}
 }
 
@@ -164,12 +174,42 @@ func TestCryptData(t *testing.T) {
 	}
 
 	// TODO: Add more examples
+
+	_, err := CryptData([]byte{0xEF, 0x65, 0x87}, plaintext, true, 2882400018, 43981)
+	if err == nil {
+		t.Errorf("CryptData should error on invalid data")
+	}
 }
 
 func TestDataPayloadCrypt(t *testing.T) {
-	// TODO: Implement TestDataPayloadCrypt
+	plaintext, _ := base64.StdEncoding.DecodeString("WW91IGxvb2sgZ29vZCwgTG9yYQ==")
+	ciphertext, _ := base64.StdEncoding.DecodeString("OWvMQw/Hk9bgJctqyXYhyVIJ9Q==")
+
+	// TODO: Add more examples
+
+	plain := &DataPayload{
+		FHDR:          fHdrs[0].structure,
+		FPort:         6,
+		RawFRMPayload: plaintext,
+	}
+
+	encrypted, _ := plain.Crypt(key, true)
+
+	if !bytes.Equal(encrypted, ciphertext) {
+		t.Errorf("DataPayload.Crypt(%#v)\n   got: %#v\n  want: %#v", plain, encrypted, ciphertext)
+	}
 }
 
 func TestCalculateMIC(t *testing.T) {
-	// TODO: Implement TestCalculateMIC
+	dataPayload := dataPayloads[0].structure
+	mHdr := mHdrs[1].structure
+	expected := []byte{0x4d, 0xea, 0xdb, 0x73}
+
+	// TODO: Add more examples
+
+	got, _ := dataPayload.CalculateMIC(mHdr, key)
+
+	if !bytes.Equal(got, expected) {
+		t.Errorf("DataPayload.CalculateMIC\n   got: %#v\n  want: %#v", got, expected)
+	}
 }
