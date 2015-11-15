@@ -121,4 +121,5 @@ func ParseMHDR(data byte) (*MHDR, error) {
 // MACPayload represents the payload of data/join request/join accept messages
 type MACPayload interface {
 	Bytes() []byte
+	CalculateMIC(mhdr *MHDR, nwkSKey []byte) ([]byte, error)
 }
