@@ -67,7 +67,10 @@ func ParsePHYPayload(data []byte) (*PHYPayload, error) {
 		MIC:           data[len(data)-4 : len(data)],
 	}
 
-	mhdr, _ := ParseMHDR(data[0])
+	mhdr, mHdrErr := ParseMHDR(data[0])
+	if mHdrErr != nil {
+		return nil, fmt.Errorf("Failed to parse MHDR: %s", mHdrErr.Error())
+	}
 	phyPayload.MHDR = mhdr
 
 	if mhdr.Major != macMajorLoRaWANR1 {
@@ -75,21 +78,22 @@ func ParsePHYPayload(data []byte) (*PHYPayload, error) {
 	}
 
 	// TODO: Find a more elegant solution for this:
+	var macPldErr error
 	switch mhdr.MType {
 	case macMTypeUnconfirmedDataUp,
 		macMTypeUnconfirmedDataDown,
 		macMTypeConfirmedDataUp,
 		macMTypeConfirmedDataDown:
-		phyPayload.DataPayload, _ = ParseDataPayload(phyPayload.RawMACPayload)
+		phyPayload.DataPayload, macPldErr = ParseDataPayload(phyPayload.RawMACPayload)
 	case macMTypeJoinRequest:
-		phyPayload.JoinRequestPayload, _ = ParseJoinRequestPayload(phyPayload.RawMACPayload)
+		phyPayload.JoinRequestPayload, macPldErr = ParseJoinRequestPayload(phyPayload.RawMACPayload)
 	case macMTypeJoinAccept:
-		phyPayload.JoinAcceptPayload, _ = ParseJoinAcceptPayload(phyPayload.RawMACPayload)
+		phyPayload.JoinAcceptPayload, macPldErr = ParseJoinAcceptPayload(phyPayload.RawMACPayload)
 	default:
 		return phyPayload, fmt.Errorf("MType %d not supported", mhdr.MType)
 	}
 
-	return phyPayload, nil
+	return phyPayload, macPldErr
 }
 
 /* MHDR Implementations */
