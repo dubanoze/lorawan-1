@@ -4,16 +4,46 @@
 
 package lorawan
 
-import "testing"
+import (
+	"bytes"
+	"reflect"
+	"testing"
+)
 
 /* PHYPayload Tests */
 
-func TestPHYPayloadRaw(t *testing.T) {
-	// TODO: Implement TestPHYPayloadRaw
+type PHYPayloadTest struct {
+	structure *PHYPayload
+	binary    []byte
 }
 
+var (
+	phyPayloads = []PHYPayloadTest{
+		{&PHYPayload{
+			MHDR:        mHdrs[1].structure,
+			DataPayload: dataPayloads[0].structure,
+			MIC:         []byte{0x4d, 0xea, 0xdb, 0x73},
+		}, []byte{0xa0, 0x34, 0x12, 0xcd, 0xab, 0x0, 0x2, 0x56, 0x6, 0x54, 0x54, 0x4e, 0x4d, 0xea, 0xdb, 0x73}},
+	}
+)
+
 func TestParsePHYPayload(t *testing.T) {
-	// TODO: Implement TestParsePHYPayload
+	// TODO: Test for invalid inputs
+
+	for _, c := range phyPayloads {
+		got, _ := ParsePHYPayload(c.binary)
+
+		if !reflect.DeepEqual(got.MHDR, c.structure.MHDR) {
+			t.Errorf("ParseMHDR(%#v).MHDR\n   got: %#v\n  want: %#v", c.binary, got.MHDR, c.structure.MHDR)
+		}
+		if !reflect.DeepEqual(got.DataPayload.RawFRMPayload, c.structure.DataPayload.RawFRMPayload) {
+			t.Errorf("ParseMHDR(%#v).DataPayload.RawFRMPayload\n   got: %#v\n  want: %#v", c.binary, got.DataPayload.RawFRMPayload, c.structure.DataPayload.RawFRMPayload)
+		}
+		if !bytes.Equal(got.MIC, c.structure.MIC) {
+			t.Errorf("ParseMHDR(%#v).MIC\n   got: %#v\n  want: %#v", c.binary, got.MIC, c.structure.MIC)
+		}
+
+	}
 }
 
 /* MHDR Tests */
