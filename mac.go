@@ -4,10 +4,7 @@
 
 package lorawan
 
-import (
-	"bytes"
-	"fmt"
-)
+import "fmt"
 
 const (
 	// MType bit field values
@@ -30,9 +27,8 @@ const (
 // PHYPayload contains the data structure of a payload described in
 // Section 4.1 of the LoRaWan Specification
 type PHYPayload struct {
-	MHDR       *MHDR
-	RawMHDR    byte // Use MHDR.Bytes() instead
-	MACPayload MACPayload
+	MHDR    *MHDR
+	RawMHDR byte // Use MHDR.Bytes() instead
 	// TODO: Find a more elegant solution for this:
 	DataPayload        *DataPayload        // In case it's a data message
 	JoinRequestPayload *JoinRequestPayload // In case it's a join request message
@@ -41,13 +37,21 @@ type PHYPayload struct {
 	MIC                []byte
 }
 
-// Bytes returns the binary representation of the PHYPayload
-func (phyPayload *PHYPayload) Bytes() []byte {
-	phyPayloadbuf := new(bytes.Buffer)
-	phyPayloadbuf.WriteByte(phyPayload.MHDR.Byte())
-	phyPayloadbuf.Write(phyPayload.MACPayload.Bytes())
-	phyPayloadbuf.Write(phyPayload.MIC)
-	return phyPayloadbuf.Bytes()
+// MACPayload returns the MAC Payload for this message type
+func (phyPayload *PHYPayload) MACPayload() (MACPayload, error) {
+	switch phyPayload.MHDR.MType {
+	case macMTypeUnconfirmedDataUp,
+		macMTypeUnconfirmedDataDown,
+		macMTypeConfirmedDataUp,
+		macMTypeConfirmedDataDown:
+		return phyPayload.DataPayload, nil
+	case macMTypeJoinRequest:
+		return phyPayload.JoinRequestPayload, nil
+	case macMTypeJoinAccept:
+		return phyPayload.JoinAcceptPayload, nil
+	default:
+		return nil, fmt.Errorf("MType %d not supported", phyPayload.MHDR.MType)
+	}
 }
 
 // ParsePHYPayload parses binary data to a PHYPayload
@@ -77,13 +81,10 @@ func ParsePHYPayload(data []byte) (*PHYPayload, error) {
 		macMTypeConfirmedDataUp,
 		macMTypeConfirmedDataDown:
 		phyPayload.DataPayload, _ = ParseDataPayload(phyPayload.RawMACPayload)
-		phyPayload.MACPayload = phyPayload.DataPayload
 	case macMTypeJoinRequest:
 		phyPayload.JoinRequestPayload, _ = ParseJoinRequestPayload(phyPayload.RawMACPayload)
-		phyPayload.MACPayload = phyPayload.JoinRequestPayload
 	case macMTypeJoinAccept:
 		phyPayload.JoinAcceptPayload, _ = ParseJoinAcceptPayload(phyPayload.RawMACPayload)
-		phyPayload.MACPayload = phyPayload.JoinAcceptPayload
 	default:
 		return phyPayload, fmt.Errorf("MType %d not supported", mhdr.MType)
 	}
